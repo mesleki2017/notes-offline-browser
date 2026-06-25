@@ -1068,7 +1068,7 @@
                     // DragOver, DragLeave, Drop olayları item'lara değil, notesContainer'a atanmalı
                     // (veya her bir item için ayrı ayrı dinlenecekse de eklenmeli).
                     // Bu düzeltmede, DragOver, DragLeave, Drop olayları notesContainer'a atanır ve orada kalır.
-                    item.addEventListener('dragstart', DragAndAnd.handleDragStart);
+                    item.addEventListener('dragstart', DragAndDrop.handleDragStart);
                     item.addEventListener('dragend', DragAndDrop.handleDragEnd);
                 });
             },
