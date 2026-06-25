@@ -223,6 +223,16 @@
             box-sizing: border-box;
         }
 
+        .post-it .edit-category-select {
+            width: calc(100% - 20px);
+            margin-bottom: 8px;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
         .post-it .edit-buttons {
             display: flex;
             justify-content: flex-end;
@@ -802,6 +812,13 @@
             return text;
         };
 
+        const getCategoryOptionsHtml = (selectedCategory = 'genel') => Object.entries(categoryTranslationKeys)
+            .map(([value, translationKey]) => {
+                const selected = value === selectedCategory ? ' selected' : '';
+                return `<option value="${value}"${selected}>${t(translationKey)}</option>`;
+            })
+            .join('');
+
         // Yardımcı Fonksiyonlar
         const Helpers = {
             formatTimestamp: (date = new Date()) => {
@@ -964,9 +981,13 @@
 
                 const originalContent = note.content;
                 const originalTitle = note.title;
+                const originalCategory = note.category || 'genel';
 
                 noteElement.querySelector('.note-content').innerHTML = `
                     <input type="text" class="edit-title-input" value="${Helpers.escapeHtml(originalTitle)}" placeholder="${t('editTitlePlaceholder')}">
+                    <select class="edit-category-select" aria-label="${t('categoryLabel')}">
+                        ${getCategoryOptionsHtml(originalCategory)}
+                    </select>
                     <textarea class="edit-textarea">${originalContent}</textarea>
                     <div class="edit-buttons">
                         <button class="btn btn-success btn-sm" data-action="save-edit">${t('saveEditButton')}</button>
@@ -976,20 +997,22 @@
 
                 // Edit alanına focusla
                 const editTitleInput = noteElement.querySelector('.edit-title-input');
+                const editCategorySelect = noteElement.querySelector('.edit-category-select');
                 const editTextArea = noteElement.querySelector('.edit-textarea');
                 editTextArea.focus();
 
-                noteElement.querySelector('[data-action="save-edit"]').onclick = () => NoteActions.saveEditedNote(index, editTitleInput.value, editTextArea.value);
+                noteElement.querySelector('[data-action="save-edit"]').onclick = () => NoteActions.saveEditedNote(index, editTitleInput.value, editTextArea.value, editCategorySelect.value);
                 noteElement.querySelector('[data-action="cancel-edit"]').onclick = () => NoteActions.cancelEdit(index, originalTitle, originalContent);
             },
 
-            saveEditedNote: (index, newTitle, newContent) => {
+            saveEditedNote: (index, newTitle, newContent, newCategory) => {
                 if (!newContent.trim()) {
                     Helpers.showToast(t('editEmptyContentWarning'));
                     return;
                 }
                 notes[index].title = newTitle;
                 notes[index].content = newContent;
+                notes[index].category = newCategory;
                 notes[index].timestamp = Helpers.formatTimestamp(); // Düzenlendiğinde zaman damgasını güncelle
                 NoteData.saveNotesToUrl();
                 UI.renderNotes();
