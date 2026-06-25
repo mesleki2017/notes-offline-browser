@@ -456,6 +456,35 @@
             padding: 8px 12px;
         }
 
+        .app-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .app-toolbar h3 {
+            margin: 0;
+        }
+
+        .language-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .language-control label {
+            font-size: 13px;
+            color: var(--dark-color);
+        }
+
+        .language-control select {
+            width: auto;
+            padding: 6px 8px;
+            font-size: 14px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -469,97 +498,111 @@
             .filters-container {
                 justify-content: center;
             }
+
+            .app-toolbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="input-area">
-            <h3>Yeni Not Ekle</h3>
-            
-            <div class="input-group">
-                <label for="noteTitle">Başlık (Opsiyonel)</label>
-                <input type="text" id="noteTitle" placeholder="Not başlığı...">
+            <div class="app-toolbar">
+                <h3 data-i18n="newNoteTitle">Yeni Not Ekle</h3>
+                <div class="language-control">
+                    <label for="languageSelect" data-i18n="languageLabel">Dil</label>
+                    <select id="languageSelect" aria-label="Dil">
+                        <option value="tr">Türkçe</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
             </div>
             
             <div class="input-group">
-                <label for="noteCategory">Kategori</label>
+                <label for="noteTitle" data-i18n="titleLabel">Başlık (Opsiyonel)</label>
+                <input type="text" id="noteTitle" placeholder="Not başlığı..." data-i18n-placeholder="titlePlaceholder">
+            </div>
+            
+            <div class="input-group">
+                <label for="noteCategory" data-i18n="categoryLabel">Kategori</label>
                 <select id="noteCategory">
-                    <option value="genel">Genel</option>
-                    <option value="is">İş</option>
-                    <option value="okul">Okul</option>
-                    <option value="alisveris">Alışveriş</option>
-                    <option value="kişisel">Kişisel</option>
-                    <option value="diger">Diğer</option>
+                    <option value="genel" data-i18n="categoryGeneral">Genel</option>
+                    <option value="is" data-i18n="categoryWork">İş</option>
+                    <option value="okul" data-i18n="categorySchool">Okul</option>
+                    <option value="alisveris" data-i18n="categoryShopping">Alışveriş</option>
+                    <option value="kişisel" data-i18n="categoryPersonal">Kişisel</option>
+                    <option value="diger" data-i18n="categoryOther">Diğer</option>
                 </select>
             </div>
             
             <div class="color-picker-container">
-                <label for="colorPicker">Not Rengi: </label>
+                <label for="colorPicker" data-i18n="noteColorLabel">Not Rengi: </label>
                 <input type="color" id="colorPicker" value="#fff9a1">
             </div>
             
             <div class="input-group">
-                <label for="noteText">Not İçeriği</label>
-                <textarea id="noteText" placeholder="Notlarınızı buraya yazın..."></textarea>
+                <label for="noteText" data-i18n="contentLabel">Not İçeriği</label>
+                <textarea id="noteText" placeholder="Notlarınızı buraya yazın..." data-i18n-placeholder="contentPlaceholder"></textarea>
             </div>
             
             <button class="btn" id="saveNoteBtn">
-                <span>💾</span> Kaydet
+                <span>💾</span> <span data-i18n="saveButton">Kaydet</span>
             </button>
             <button class="btn btn-success" id="addBookmarkBtn">
-                <span>🔖</span> Kısayol Ekle
+                <span>🔖</span> <span data-i18n="bookmarkButton">Kısayol Ekle</span>
             </button>
             <button class="btn btn-warning" id="exportNotesBtn">
-                <span>📥</span> Notları İndir
+                <span>📥</span> <span data-i18n="exportButton">Notları İndir</span>
             </button>
             
             <input type="file" id="importFileInput" accept=".json">
             <button class="btn btn-info" id="importNotesBtn">
-                <span>📤</span> Notları Yükle
+                <span>📤</span> <span data-i18n="importButton">Notları Yükle</span>
             </button>
             
             <button class="btn btn-danger" id="clearNotesBtn">
-                <span>🗑️</span> Tüm Notları Temizle
+                <span>🗑️</span> <span data-i18n="clearButton">Tüm Notları Temizle</span>
             </button>
         </div>
         
         <div class="notes-area" id="notesContainer">
-            <h3>Notlarım</h3>
+            <h3 data-i18n="myNotesTitle">Notlarım</h3>
             
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Notlarda ara...">
+                <input type="text" id="searchInput" placeholder="Notlarda ara..." data-i18n-placeholder="searchPlaceholder">
             </div>
             
             <div class="sort-options">
                 <select id="sortSelect">
-                    <option value="newest">En Yeni</option>
-                    <option value="oldest">En Eski</option>
-                    <option value="important">Önemli Olanlar</option>
-                    <option value="title">Başlığa Göre (A-Z)</option>
+                    <option value="newest" data-i18n="sortNewest">En Yeni</option>
+                    <option value="oldest" data-i18n="sortOldest">En Eski</option>
+                    <option value="important" data-i18n="sortImportant">Önemli Olanlar</option>
+                    <option value="title" data-i18n="sortTitle">Başlığa Göre (A-Z)</option>
                 </select>
             </div>
             
             <div class="filters-container" id="categoryFilters">
-                <button class="filter-btn all active" data-category="all">Tümü</button>
-                <button class="filter-btn" data-category="genel">Genel</button>
-                <button class="filter-btn" data-category="is">İş</button>
-                <button class="filter-btn" data-category="okul">Okul</option>
-                <button class="filter-btn" data-category="alisveris">Alışveriş</button>
-                <button class="filter-btn" data-category="kişisel">Kişisel</button>
-                <button class="filter-btn" data-category="diger">Diğer</button>
+                <button class="filter-btn all active" data-category="all" data-i18n="categoryAll">Tümü</button>
+                <button class="filter-btn" data-category="genel" data-i18n="categoryGeneral">Genel</button>
+                <button class="filter-btn" data-category="is" data-i18n="categoryWork">İş</button>
+                <button class="filter-btn" data-category="okul" data-i18n="categorySchool">Okul</button>
+                <button class="filter-btn" data-category="alisveris" data-i18n="categoryShopping">Alışveriş</button>
+                <button class="filter-btn" data-category="kişisel" data-i18n="categoryPersonal">Kişisel</button>
+                <button class="filter-btn" data-category="diger" data-i18n="categoryOther">Diğer</button>
             </div>
             
-            <p id="noNotesMessage">Henüz not yok. Yeni bir not ekleyerek başlayın!</p>
+            <p id="noNotesMessage" data-i18n="emptyNotes">Henüz not yok. Yeni bir not ekleyerek başlayın!</p>
         </div>
     </div>
 
     <div class="modal" id="exitModal">
         <div class="modal-content">
-            <p>Metin alanında kaydedilmemiş bir not var. Kaydetmek ister misiniz?</p>
-            <button class="btn btn-success" id="saveAndExitBtn">Kaydet ve Çık</button>
-            <button class="btn btn-danger" id="exitWithoutSavingBtn">Çık</button>
-            <button class="btn btn-default" id="cancelExitBtn">İptal</button>
+            <p data-i18n="unsavedNotePrompt">Metin alanında kaydedilmemiş bir not var. Kaydetmek ister misiniz?</p>
+            <button class="btn btn-success" id="saveAndExitBtn" data-i18n="saveAndExitButton">Kaydet ve Çık</button>
+            <button class="btn btn-danger" id="exitWithoutSavingBtn" data-i18n="exitButton">Çık</button>
+            <button class="btn btn-default" id="cancelExitBtn" data-i18n="cancelButton">İptal</button>
         </div>
     </div>
     
@@ -578,6 +621,7 @@
             importFileInput: document.getElementById('importFileInput'),
             importNotesBtn: document.getElementById('importNotesBtn'),
             clearNotesBtn: document.getElementById('clearNotesBtn'),
+            languageSelect: document.getElementById('languageSelect'),
             notesContainer: document.getElementById('notesContainer'),
             searchInput: document.getElementById('searchInput'),
             sortSelect: document.getElementById('sortSelect'),
@@ -597,8 +641,166 @@
         let currentCategoryFilter = 'all';
         let currentSearchQuery = '';
         let currentSortMethod = 'newest';
+        let currentLanguage = localStorage.getItem('preferredLanguage') || 'tr';
         let draggedItem = null; // Sürüklenen not elementi
         let dragStartIndex = -1; // Sürüklenen notun orijinal indeksi
+
+        const translations = {
+            tr: {
+                pageTitle: 'Gelişmiş Not Defteri',
+                newNoteTitle: 'Yeni Not Ekle',
+                languageLabel: 'Dil',
+                titleLabel: 'Başlık (Opsiyonel)',
+                titlePlaceholder: 'Not başlığı...',
+                categoryLabel: 'Kategori',
+                noteColorLabel: 'Not Rengi: ',
+                contentLabel: 'Not İçeriği',
+                contentPlaceholder: 'Notlarınızı buraya yazın...',
+                saveButton: 'Kaydet',
+                bookmarkButton: 'Kısayol Ekle',
+                exportButton: 'Notları İndir',
+                importButton: 'Notları Yükle',
+                clearButton: 'Tüm Notları Temizle',
+                myNotesTitle: 'Notlarım',
+                searchPlaceholder: 'Notlarda ara...',
+                sortNewest: 'En Yeni',
+                sortOldest: 'En Eski',
+                sortImportant: 'Önemli Olanlar',
+                sortTitle: 'Başlığa Göre (A-Z)',
+                categoryAll: 'Tümü',
+                categoryGeneral: 'Genel',
+                categoryWork: 'İş',
+                categorySchool: 'Okul',
+                categoryShopping: 'Alışveriş',
+                categoryPersonal: 'Kişisel',
+                categoryOther: 'Diğer',
+                emptyNotes: 'Henüz not yok. Yeni bir not ekleyerek başlayın!',
+                noFilteredNotes: 'Filtreleme kriterlerinize uygun not bulunamadı.',
+                unsavedNotePrompt: 'Metin alanında kaydedilmemiş bir not var. Kaydetmek ister misiniz?',
+                saveAndExitButton: 'Kaydet ve Çık',
+                exitButton: 'Çık',
+                cancelButton: 'İptal',
+                untitledNote: 'Başlıksız Not',
+                editTitlePlaceholder: 'Başlık',
+                saveEditButton: 'Kaydet',
+                emptyContentWarning: 'Lütfen not içeriğini boş bırakmayın!',
+                noteSaved: 'Not başarıyla kaydedildi!',
+                deleteNoteConfirm: 'Bu notu silmek istediğinize emin misiniz?',
+                noteDeleted: 'Not başarıyla silindi!',
+                editEmptyContentWarning: 'Not içeriği boş bırakılamaz!',
+                noteUpdated: 'Not başarıyla güncellendi!',
+                markedImportant: 'Not önemli olarak işaretlendi!',
+                unmarkedImportant: 'Notun önemi kaldırıldı!',
+                clearAllConfirm: 'Tüm notları silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!',
+                allNotesDeleted: 'Tüm notlar silindi!',
+                bookmarkPrompt: 'Bu sayfayı yer işaretlerine eklemek için bir isim girin:',
+                bookmarkDefaultTitle: 'Not Defteri',
+                bookmarkCopied: 'URL kopyalandı: {url}\nTarayıcınızın yer işaretlerine ekleyebilirsiniz.',
+                bookmarkFallback: "URL: {url}\nBu URL'yi tarayıcınızın yer işaretlerine ekleyin.",
+                noNotesToExport: 'İndirilecek not yok!',
+                notesExported: 'Notlar başarıyla indirildi!',
+                invalidJsonFile: 'Lütfen JSON formatında bir dosya yükleyin.',
+                invalidImportFormat: 'Geçersiz dosya formatı',
+                noValidNotesInFile: 'Yüklenen dosyada geçerli not bulunamadı.',
+                importConfirm: '{count} not bulundu. Mevcut notların üzerine yazılsın mı yoksa eklensin mi?\n\nTamam: Üzerine yaz\nİptal: Mevcut notlara ekle',
+                notesImported: '{count} not başarıyla yüklendi!',
+                importReadError: 'Dosya okunamadı. Geçerli bir not dosyası olduğundan emin olun.',
+                fileReadError: 'Dosya okunamadı. Lütfen tekrar deneyin.',
+                notesLoadError: 'Notlar yüklenirken bir sorun oluştu.',
+                invalidDrag: 'Geçersiz sürükleme işlemi.',
+                reorderFailed: 'Notun sırası değiştirilemedi.',
+                droppedSamePlace: 'Not aynı yere bırakıldı.',
+                noteReordered: 'Notun sırası değiştirildi!',
+                noteMovedToEnd: 'Not en sona taşındı!',
+                droppedOnSelf: 'Not kendi üzerine bırakıldı.'
+            },
+            en: {
+                pageTitle: 'Advanced Notepad',
+                newNoteTitle: 'Add New Note',
+                languageLabel: 'Language',
+                titleLabel: 'Title (Optional)',
+                titlePlaceholder: 'Note title...',
+                categoryLabel: 'Category',
+                noteColorLabel: 'Note Color: ',
+                contentLabel: 'Note Content',
+                contentPlaceholder: 'Write your notes here...',
+                saveButton: 'Save',
+                bookmarkButton: 'Add Shortcut',
+                exportButton: 'Download Notes',
+                importButton: 'Upload Notes',
+                clearButton: 'Clear All Notes',
+                myNotesTitle: 'My Notes',
+                searchPlaceholder: 'Search notes...',
+                sortNewest: 'Newest',
+                sortOldest: 'Oldest',
+                sortImportant: 'Important First',
+                sortTitle: 'By Title (A-Z)',
+                categoryAll: 'All',
+                categoryGeneral: 'General',
+                categoryWork: 'Work',
+                categorySchool: 'School',
+                categoryShopping: 'Shopping',
+                categoryPersonal: 'Personal',
+                categoryOther: 'Other',
+                emptyNotes: 'No notes yet. Add a new note to get started.',
+                noFilteredNotes: 'No notes match your filters.',
+                unsavedNotePrompt: 'There is an unsaved note in the text area. Would you like to save it?',
+                saveAndExitButton: 'Save and Exit',
+                exitButton: 'Exit',
+                cancelButton: 'Cancel',
+                untitledNote: 'Untitled Note',
+                editTitlePlaceholder: 'Title',
+                saveEditButton: 'Save',
+                emptyContentWarning: 'Please do not leave the note content empty.',
+                noteSaved: 'Note saved successfully.',
+                deleteNoteConfirm: 'Are you sure you want to delete this note?',
+                noteDeleted: 'Note deleted successfully.',
+                editEmptyContentWarning: 'Note content cannot be empty.',
+                noteUpdated: 'Note updated successfully.',
+                markedImportant: 'Note marked as important.',
+                unmarkedImportant: 'Note is no longer marked as important.',
+                clearAllConfirm: 'Are you sure you want to delete all notes? This cannot be undone.',
+                allNotesDeleted: 'All notes deleted.',
+                bookmarkPrompt: 'Enter a name for this bookmark:',
+                bookmarkDefaultTitle: 'Notepad',
+                bookmarkCopied: 'URL copied: {url}\nYou can add it to your browser bookmarks.',
+                bookmarkFallback: 'URL: {url}\nAdd this URL to your browser bookmarks.',
+                noNotesToExport: 'There are no notes to download.',
+                notesExported: 'Notes downloaded successfully.',
+                invalidJsonFile: 'Please upload a JSON file.',
+                invalidImportFormat: 'Invalid file format',
+                noValidNotesInFile: 'No valid notes were found in the uploaded file.',
+                importConfirm: '{count} notes found. Should they replace your existing notes or be appended?\n\nOK: Replace\nCancel: Append',
+                notesImported: '{count} notes imported successfully.',
+                importReadError: 'The file could not be read. Make sure it is a valid notes file.',
+                fileReadError: 'The file could not be read. Please try again.',
+                notesLoadError: 'There was a problem loading notes.',
+                invalidDrag: 'Invalid drag operation.',
+                reorderFailed: 'Could not reorder the note.',
+                droppedSamePlace: 'The note was dropped in the same place.',
+                noteReordered: 'Note order changed.',
+                noteMovedToEnd: 'Note moved to the end.',
+                droppedOnSelf: 'The note was dropped onto itself.'
+            }
+        };
+
+        const categoryTranslationKeys = {
+            genel: 'categoryGeneral',
+            is: 'categoryWork',
+            okul: 'categorySchool',
+            alisveris: 'categoryShopping',
+            'kişisel': 'categoryPersonal',
+            diger: 'categoryOther'
+        };
+
+        const t = (key, replacements = {}) => {
+            const dictionary = translations[currentLanguage] || translations.tr;
+            let text = dictionary[key] || translations.tr[key] || key;
+            Object.keys(replacements).forEach(name => {
+                text = text.replaceAll(`{${name}}`, replacements[name]);
+            });
+            return text;
+        };
 
         // Yardımcı Fonksiyonlar
         const Helpers = {
@@ -612,7 +814,7 @@
                     hour12: false,
                     timeZone: 'Europe/Istanbul'
                 };
-                return date.toLocaleString('tr-TR', options);
+                return date.toLocaleString(currentLanguage === 'en' ? 'en-US' : 'tr-TR', options);
             },
 
             showToast: (message, duration = 3000) => {
@@ -653,7 +855,7 @@
                     } catch (e) {
                         console.error("Notlar yüklenirken hata oluştu:", e);
                         notes = [];
-                        Helpers.showToast('Notlar yüklenirken bir sorun oluştu.');
+                        Helpers.showToast(t('notesLoadError'));
                     }
                 } else {
                     notes = [];
@@ -712,7 +914,7 @@
                 const color = DOM.colorPicker.value;
 
                 if (!content) {
-                    Helpers.showToast('Lütfen not içeriğini boş bırakmayın!');
+                    Helpers.showToast(t('emptyContentWarning'));
                     return;
                 }
 
@@ -735,7 +937,7 @@
                 DOM.noteCategory.value = 'genel';
                 DOM.colorPicker.value = '#fff9a1';
                 isTextChanged = false;
-                Helpers.showToast('Not başarıyla kaydedildi!');
+                Helpers.showToast(t('noteSaved'));
 
                 if (doExit && exitTargetUrl) {
                     window.location.href = exitTargetUrl;
@@ -745,11 +947,11 @@
             },
 
             deleteNote: (index) => {
-                if (confirm('Bu notu silmek istediğinize emin misiniz?')) {
+                if (confirm(t('deleteNoteConfirm'))) {
                     notes.splice(index, 1);
                     NoteData.saveNotesToUrl();
                     UI.renderNotes();
-                    Helpers.showToast('Not başarıyla silindi!');
+                    Helpers.showToast(t('noteDeleted'));
                 }
             },
 
@@ -764,11 +966,11 @@
                 const originalTitle = note.title;
 
                 noteElement.querySelector('.note-content').innerHTML = `
-                    <input type="text" class="edit-title-input" value="${Helpers.escapeHtml(originalTitle)}" placeholder="Başlık">
+                    <input type="text" class="edit-title-input" value="${Helpers.escapeHtml(originalTitle)}" placeholder="${t('editTitlePlaceholder')}">
                     <textarea class="edit-textarea">${originalContent}</textarea>
                     <div class="edit-buttons">
-                        <button class="btn btn-success btn-sm" data-action="save-edit">Kaydet</button>
-                        <button class="btn btn-danger btn-sm" data-action="cancel-edit">İptal</button>
+                        <button class="btn btn-success btn-sm" data-action="save-edit">${t('saveEditButton')}</button>
+                        <button class="btn btn-danger btn-sm" data-action="cancel-edit">${t('cancelButton')}</button>
                     </div>
                 `;
 
@@ -783,7 +985,7 @@
 
             saveEditedNote: (index, newTitle, newContent) => {
                 if (!newContent.trim()) {
-                    Helpers.showToast('Not içeriği boş bırakılamaz!');
+                    Helpers.showToast(t('editEmptyContentWarning'));
                     return;
                 }
                 notes[index].title = newTitle;
@@ -791,7 +993,7 @@
                 notes[index].timestamp = Helpers.formatTimestamp(); // Düzenlendiğinde zaman damgasını güncelle
                 NoteData.saveNotesToUrl();
                 UI.renderNotes();
-                Helpers.showToast('Not başarıyla güncellendi!');
+                Helpers.showToast(t('noteUpdated'));
             },
 
             cancelEdit: (index, originalTitle, originalContent) => {
@@ -802,34 +1004,34 @@
                 notes[index].isImportant = !notes[index].isImportant;
                 NoteData.saveNotesToUrl();
                 UI.renderNotes(); // Notları yeniden çizerek önemli ikonunu güncelle
-                Helpers.showToast(notes[index].isImportant ? 'Not önemli olarak işaretlendi!' : 'Notun önemi kaldırıldı!');
+                Helpers.showToast(notes[index].isImportant ? t('markedImportant') : t('unmarkedImportant'));
             },
 
             clearAllNotes: () => {
-                if (confirm('Tüm notları silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
+                if (confirm(t('clearAllConfirm'))) {
                     notes = [];
                     NoteData.saveNotesToUrl();
                     UI.renderNotes();
-                    Helpers.showToast('Tüm notlar silindi!');
+                    Helpers.showToast(t('allNotesDeleted'));
                 }
             },
 
             addBookmark: () => {
                 const currentUrl = window.location.href;
-                const bookmarkTitle = prompt('Bu sayfayı yer işaretlerine eklemek için bir isim girin:', 'Not Defteri');
+                const bookmarkTitle = prompt(t('bookmarkPrompt'), t('bookmarkDefaultTitle'));
 
                 if (bookmarkTitle) {
                     navigator.clipboard.writeText(currentUrl).then(() => {
-                        Helpers.showToast(`URL kopyalandı: ${currentUrl}\nTarayıcınızın yer işaretlerine ekleyebilirsiniz.`);
+                        Helpers.showToast(t('bookmarkCopied', { url: currentUrl }));
                     }).catch(() => {
-                        alert(`URL: ${currentUrl}\nBu URL'yi tarayıcınızın yer işaretlerine ekleyin.`);
+                        alert(t('bookmarkFallback', { url: currentUrl }));
                     });
                 }
             },
 
             exportNotes: () => {
                 if (notes.length === 0) {
-                    Helpers.showToast('İndirilecek not yok!');
+                    Helpers.showToast(t('noNotesToExport'));
                     return;
                 }
 
@@ -857,7 +1059,7 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
 
-                Helpers.showToast('Notlar başarıyla indirildi!');
+                Helpers.showToast(t('notesExported'));
             },
 
             importNotes: (event) => {
@@ -865,7 +1067,7 @@
                 if (!file) return;
 
                 if (file.type !== 'application/json') {
-                    Helpers.showToast('Lütfen JSON formatında bir dosya yükleyin.');
+                    Helpers.showToast(t('invalidJsonFile'));
                     return;
                 }
 
@@ -880,11 +1082,11 @@
                         } else if (importedData.notes && Array.isArray(importedData.notes)) {
                             importedNotes = importedData.notes;
                         } else {
-                            throw new Error("Geçersiz dosya formatı");
+                            throw new Error(t('invalidImportFormat'));
                         }
 
                         if (importedNotes.length === 0) {
-                            Helpers.showToast('Yüklenen dosyada geçerli not bulunamadı.');
+                            Helpers.showToast(t('noValidNotesInFile'));
                             return;
                         }
 
@@ -898,7 +1100,7 @@
                             timestamp: note.timestamp || Helpers.formatTimestamp()
                         }));
 
-                        const importConfirm = confirm(`${newNotes.length} not bulundu. Mevcut notların üzerine yazılsın mı yoksa eklensin mi?\n\nTamam: Üzerine yaz\nİptal: Mevcut notlara ekle`);
+                        const importConfirm = confirm(t('importConfirm', { count: newNotes.length }));
 
                         if (importConfirm) {
                             notes = newNotes;
@@ -908,16 +1110,16 @@
 
                         NoteData.saveNotesToUrl();
                         UI.renderNotes();
-                        Helpers.showToast(`${newNotes.length} not başarıyla yüklendi!`);
+                        Helpers.showToast(t('notesImported', { count: newNotes.length }));
 
                     } catch (error) {
                         console.error("İçe aktarma hatası:", error);
-                        Helpers.showToast('Dosya okunamadı. Geçerli bir not dosyası olduğundan emin olun.');
+                        Helpers.showToast(t('importReadError'));
                     }
                 };
 
                 reader.onerror = () => {
-                    Helpers.showToast('Dosya okunamadı. Lütfen tekrar deneyin.');
+                    Helpers.showToast(t('fileReadError'));
                 };
 
                 reader.readAsText(file);
@@ -927,6 +1129,26 @@
 
         // UI Güncelleme ve İşleme
         const UI = {
+            applyLanguage: () => {
+                const safeLanguage = translations[currentLanguage] ? currentLanguage : 'tr';
+                currentLanguage = safeLanguage;
+                localStorage.setItem('preferredLanguage', currentLanguage);
+                document.documentElement.lang = currentLanguage;
+                document.title = t('pageTitle');
+                DOM.languageSelect.value = currentLanguage;
+                DOM.languageSelect.setAttribute('aria-label', t('languageLabel'));
+
+                document.querySelectorAll('[data-i18n]').forEach(element => {
+                    element.textContent = t(element.dataset.i18n);
+                });
+
+                document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                    element.placeholder = t(element.dataset.i18nPlaceholder);
+                });
+
+                UI.renderNotes();
+            },
+
             renderNotes: () => {
                 const filteredNotes = NoteData.getFilteredAndSortedNotes();
 
@@ -940,8 +1162,8 @@
 
                 if (filteredNotes.length === 0) {
                     DOM.noNotesMessage.textContent = currentSearchQuery || currentCategoryFilter !== 'all'
-                        ? 'Filtreleme kriterlerinize uygun not bulunamadı.'
-                        : 'Henüz not yok. Yeni bir not ekleyerek başlayın!';
+                        ? t('noFilteredNotes')
+                        : t('emptyNotes');
                     DOM.noNotesMessage.style.display = 'block';
                     DOM.notesContainer.appendChild(DOM.noNotesMessage); // Mesajı ekle
                 } else {
@@ -953,7 +1175,7 @@
                         notesListHtml += `
                             <div class="post-it" draggable="true" data-index="${originalIndex}" style="background-color: ${note.color}; border-color: ${note.color};">
                                 <div class="note-header">
-                                    <div class="note-title">${Helpers.escapeHtml(note.title) || 'Başlıksız Not'}</div>
+                                    <div class="note-title">${Helpers.escapeHtml(note.title) || t('untitledNote')}</div>
                                     <button class="star-btn action-btn ${note.isImportant ? 'active' : ''}" data-index="${originalIndex}">
                                         ${note.isImportant ? '★' : '☆'}
                                     </button>
@@ -961,7 +1183,7 @@
                                 <div class="timestamp">${note.timestamp}</div>
                                 <div class="note-content">${Helpers.escapeHtml(note.content)}</div>
                                 <div class="note-footer">
-                                    <span class="note-category">${note.category}</span>
+                                    <span class="note-category">${t(categoryTranslationKeys[note.category] || 'categoryOther')}</span>
                                     <div class="note-actions">
                                         <button class="edit-btn action-btn" data-index="${originalIndex}">
                                             ✏️
@@ -989,6 +1211,9 @@
                 // Sıralama select'inin değeri ve listener'ı
                 DOM.sortSelect.value = currentSortMethod;
                 DOM.sortSelect.addEventListener('change', UI.sortNotes);
+
+                DOM.languageSelect.value = currentLanguage;
+                DOM.languageSelect.addEventListener('change', UI.changeLanguage);
 
                 // Kategori filtre butonlarına listener ekle
                 // Butonlar artık HTML'de tanımlı olduğu için yeniden oluşturmuyoruz,
@@ -1046,6 +1271,11 @@
             sortNotes: () => {
                 currentSortMethod = DOM.sortSelect.value;
                 UI.renderNotes();
+            },
+
+            changeLanguage: () => {
+                currentLanguage = DOM.languageSelect.value;
+                UI.applyLanguage();
             },
 
             showModal: () => {
@@ -1137,7 +1367,7 @@
 
                     const droppedIndex = parseInt(e.dataTransfer.getData('text/plain'));
                     if (isNaN(droppedIndex) || droppedIndex === -1) {
-                         Helpers.showToast('Geçersiz sürükleme işlemi.', 1500);
+                         Helpers.showToast(t('invalidDrag'), 1500);
                          return;
                     }
                     
@@ -1154,7 +1384,7 @@
 
                         if (originalDraggedNoteIndexInCurrentNotes === -1 || originalTargetNoteIndexInCurrentNotes === -1) {
                             console.error("Notlar dizisinde sürüklenen veya hedef not bulunamadı.");
-                            Helpers.showToast('Notun sırası değiştirilemedi.', 1500);
+                            Helpers.showToast(t('reorderFailed'), 1500);
                             return;
                         }
 
@@ -1166,7 +1396,7 @@
                         
                         // Eğer aynı yere bırakılıyorsa veya mantıksız bir taşıma ise
                         if (originalDraggedNoteIndexInCurrentNotes === toIndex || originalDraggedNoteIndexInCurrentNotes === toIndex - 1) {
-                            Helpers.showToast('Not aynı yere bırakıldı.', 1500);
+                            Helpers.showToast(t('droppedSamePlace'), 1500);
                             return;
                         }
 
@@ -1174,7 +1404,7 @@
                         notes.splice(toIndex > notes.length ? notes.length : toIndex, 0, movedNote);
                         NoteData.saveNotesToUrl();
                         UI.renderNotes();
-                        Helpers.showToast('Notun sırası değiştirildi!');
+                        Helpers.showToast(t('noteReordered'));
 
                     } else if (!targetElement && draggedItem) {
                         const movedNote = notes[droppedIndex];
@@ -1182,11 +1412,11 @@
                         notes.push(movedNote);
                         NoteData.saveNotesToUrl();
                         UI.renderNotes();
-                        Helpers.showToast('Not en sona taşındı!');
+                        Helpers.showToast(t('noteMovedToEnd'));
                     } else if (targetElement === draggedItem) {
-                        Helpers.showToast('Not kendi üzerine bırakıldı.', 1500);
+                        Helpers.showToast(t('droppedOnSelf'), 1500);
                     } else {
-                         Helpers.showToast('Notun sırası değiştirilemedi.', 1500);
+                         Helpers.showToast(t('reorderFailed'), 1500);
                     }
                 }
             }
@@ -1255,7 +1485,7 @@
             NoteData.loadNotesFromUrl();
             UI.setupInitialFiltersAndSort(); // Arama ve filtreleme alanlarını ve dinleyicilerini bir kez kur
             setupEventListeners(); // Genel olay dinleyicilerini kur
-            UI.renderNotes(); // Notları ilk kez çiz
+            UI.applyLanguage(); // Dil metinlerini uygula ve notları ilk kez çiz
         });
     </script>
 </body>
