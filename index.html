@@ -654,6 +654,11 @@
         let currentLanguage = localStorage.getItem('preferredLanguage') || 'tr';
         let draggedItem = null; // Sürüklenen not elementi
         let dragStartIndex = -1; // Sürüklenen notun orijinal indeksi
+        let lastUrlSizeWarningLevel = 'safe';
+
+        const URL_WARNING_LIMIT = 8000;
+        const URL_DANGER_LIMIT = 16000;
+        const URL_CRITICAL_LIMIT = 32000;
 
         const translations = {
             tr: {
@@ -722,7 +727,10 @@
                 droppedSamePlace: 'Not aynı yere bırakıldı.',
                 noteReordered: 'Notun sırası değiştirildi!',
                 noteMovedToEnd: 'Not en sona taşındı!',
-                droppedOnSelf: 'Not kendi üzerine bırakıldı.'
+                droppedOnSelf: 'Not kendi üzerine bırakıldı.',
+                urlSizeWarning: 'Not URL’niz uzamaya başladı ({length} karakter). JSON yedeği indirmeniz iyi olur.',
+                urlSizeDanger: 'Bu URL her tarayıcıda veya yer işaretinde güvenilir çalışmayabilir ({length} karakter). JSON yedeği indirin.',
+                urlSizeCritical: 'Bu URL çok büyük ({length} karakter) ve yükleme/paylaşım sorunları çıkarabilir. Notlarınızı JSON olarak yedekleyin.'
             },
             en: {
                 pageTitle: 'Advanced Notepad',
@@ -790,7 +798,10 @@
                 droppedSamePlace: 'The note was dropped in the same place.',
                 noteReordered: 'Note order changed.',
                 noteMovedToEnd: 'Note moved to the end.',
-                droppedOnSelf: 'The note was dropped onto itself.'
+                droppedOnSelf: 'The note was dropped onto itself.',
+                urlSizeWarning: 'Your note URL is getting long ({length} characters). Consider downloading a JSON backup.',
+                urlSizeDanger: 'This URL may not work reliably in every browser or bookmark ({length} characters). Download a JSON backup.',
+                urlSizeCritical: 'This URL is very large ({length} characters) and may fail to load or share. Back up your notes as JSON.'
             }
         };
 
@@ -840,6 +851,29 @@
                 setTimeout(() => {
                     DOM.toast.classList.remove('show');
                 }, duration);
+            },
+
+            checkUrlSize: (url) => {
+                const length = url.length;
+                let level = 'safe';
+                let messageKey = '';
+
+                if (length >= URL_CRITICAL_LIMIT) {
+                    level = 'critical';
+                    messageKey = 'urlSizeCritical';
+                } else if (length >= URL_DANGER_LIMIT) {
+                    level = 'danger';
+                    messageKey = 'urlSizeDanger';
+                } else if (length >= URL_WARNING_LIMIT) {
+                    level = 'warning';
+                    messageKey = 'urlSizeWarning';
+                }
+
+                if (level !== 'safe' && level !== lastUrlSizeWarningLevel) {
+                    Helpers.showToast(t(messageKey, { length: length.toLocaleString(currentLanguage === 'en' ? 'en-US' : 'tr-TR') }), 7000);
+                }
+
+                lastUrlSizeWarningLevel = level;
             },
 
             escapeHtml: (text) => {
@@ -894,8 +928,10 @@
                 const newUrl = notes.length > 0
                     ? `${window.location.pathname}?notes=${encodeURIComponent(encodedNotes)}`
                     : window.location.pathname;
+                const absoluteUrl = `${window.location.origin}${newUrl}`;
 
                 window.history.replaceState({}, '', newUrl);
+                Helpers.checkUrlSize(absoluteUrl);
             },
 
             getFilteredAndSortedNotes: () => {
