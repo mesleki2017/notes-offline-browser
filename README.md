@@ -26,7 +26,7 @@ No build step, package manager, server, or internet connection is required.
 
 The app intentionally stores note data in the page URL, inside the `?notes=...` parameter. This makes the current note state portable and shareable as a link, while keeping the app as a single static HTML file.
 
-This is an experimental design choice. It does not use a backend database or `localStorage`, and it does not send your notes to a server.
+This is an experimental design choice. It does not use a backend database or `localStorage` for note data, and it does not send your notes to a server.
 
 URLs have practical length limits that vary by browser, bookmark manager, chat app, and operating system. When the URL becomes too long, saving new changes may fail. Use JSON export/import as a backup or transfer option for larger note sets.
 
