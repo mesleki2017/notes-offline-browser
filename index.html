@@ -654,6 +654,11 @@
         let currentLanguage = localStorage.getItem('preferredLanguage') || 'tr';
         let draggedItem = null; // Sürüklenen not elementi
         let dragStartIndex = -1; // Sürüklenen notun orijinal indeksi
+        let lastUrlSizeWarningLevel = 'safe';
+
+        const URL_WARNING_LIMIT = 8000;
+        const URL_DANGER_LIMIT = 16000;
+        const URL_CRITICAL_LIMIT = 32000;
 
         const translations = {
             tr: {
@@ -722,7 +727,11 @@
                 droppedSamePlace: 'Not aynı yere bırakıldı.',
                 noteReordered: 'Notun sırası değiştirildi!',
                 noteMovedToEnd: 'Not en sona taşındı!',
-                droppedOnSelf: 'Not kendi üzerine bırakıldı.'
+                droppedOnSelf: 'Not kendi üzerine bırakıldı.',
+                urlSizeWarning: 'Not URL’niz uzamaya başladı ({length} karakter). JSON yedeği indirmeniz iyi olur.',
+                urlSizeDanger: 'Bu URL her tarayıcıda veya yer işaretinde güvenilir çalışmayabilir ({length} karakter). JSON yedeği indirin.',
+                urlSizeCritical: 'Bu URL çok büyük ({length} karakter) ve yükleme/paylaşım sorunları çıkarabilir. Notlarınızı JSON olarak yedekleyin.',
+                urlSaveFailed: 'URL tarayıcı limitini aştığı için değişiklik kaydedilemedi ({length} karakter). JSON yedeği indirip bazı notları silin veya kısaltın.'
             },
             en: {
                 pageTitle: 'Advanced Notepad',
@@ -790,7 +799,11 @@
                 droppedSamePlace: 'The note was dropped in the same place.',
                 noteReordered: 'Note order changed.',
                 noteMovedToEnd: 'Note moved to the end.',
-                droppedOnSelf: 'The note was dropped onto itself.'
+                droppedOnSelf: 'The note was dropped onto itself.',
+                urlSizeWarning: 'Your note URL is getting long ({length} characters). Consider downloading a JSON backup.',
+                urlSizeDanger: 'This URL may not work reliably in every browser or bookmark ({length} characters). Download a JSON backup.',
+                urlSizeCritical: 'This URL is very large ({length} characters) and may fail to load or share. Back up your notes as JSON.',
+                urlSaveFailed: 'The change was not saved because the URL exceeded the browser limit ({length} characters). Download a JSON backup and delete or shorten some notes.'
             }
         };
 
@@ -840,6 +853,29 @@
                 setTimeout(() => {
                     DOM.toast.classList.remove('show');
                 }, duration);
+            },
+
+            checkUrlSize: (url) => {
+                const length = url.length;
+                let level = 'safe';
+                let messageKey = '';
+
+                if (length >= URL_CRITICAL_LIMIT) {
+                    level = 'critical';
+                    messageKey = 'urlSizeCritical';
+                } else if (length >= URL_DANGER_LIMIT) {
+                    level = 'danger';
+                    messageKey = 'urlSizeDanger';
+                } else if (length >= URL_WARNING_LIMIT) {
+                    level = 'warning';
+                    messageKey = 'urlSizeWarning';
+                }
+
+                if (level !== 'safe' && level !== lastUrlSizeWarningLevel) {
+                    Helpers.showToast(t(messageKey, { length: length.toLocaleString(currentLanguage === 'en' ? 'en-US' : 'tr-TR') }), 7000);
+                }
+
+                lastUrlSizeWarningLevel = level;
             },
 
             escapeHtml: (text) => {
@@ -894,8 +930,17 @@
                 const newUrl = notes.length > 0
                     ? `${window.location.pathname}?notes=${encodeURIComponent(encodedNotes)}`
                     : window.location.pathname;
+                const absoluteUrl = `${window.location.origin}${newUrl}`;
 
-                window.history.replaceState({}, '', newUrl);
+                try {
+                    Helpers.checkUrlSize(absoluteUrl);
+                    window.history.replaceState({}, '', newUrl);
+                    return true;
+                } catch (error) {
+                    console.error("URL güncellenirken hata oluştu:", error);
+                    Helpers.showToast(t('urlSaveFailed', { length: absoluteUrl.length.toLocaleString(currentLanguage === 'en' ? 'en-US' : 'tr-TR') }), 9000);
+                    return false;
+                }
             },
 
             getFilteredAndSortedNotes: () => {
@@ -946,7 +991,10 @@
                 };
 
                 notes.unshift(newNote); // En yeni notu en üste ekle
-                NoteData.saveNotesToUrl();
+                if (!NoteData.saveNotesToUrl()) {
+                    notes.shift();
+                    return;
+                }
                 UI.renderNotes();
 
                 DOM.noteTitle.value = '';
@@ -965,8 +1013,11 @@
 
             deleteNote: (index) => {
                 if (confirm(t('deleteNoteConfirm'))) {
-                    notes.splice(index, 1);
-                    NoteData.saveNotesToUrl();
+                    const deletedNote = notes.splice(index, 1)[0];
+                    if (!NoteData.saveNotesToUrl()) {
+                        notes.splice(index, 0, deletedNote);
+                        return;
+                    }
                     UI.renderNotes();
                     Helpers.showToast(t('noteDeleted'));
                 }
@@ -1010,11 +1061,16 @@
                     Helpers.showToast(t('editEmptyContentWarning'));
                     return;
                 }
+                const previousNote = { ...notes[index] };
                 notes[index].title = newTitle;
                 notes[index].content = newContent;
                 notes[index].category = newCategory;
                 notes[index].timestamp = Helpers.formatTimestamp(); // Düzenlendiğinde zaman damgasını güncelle
-                NoteData.saveNotesToUrl();
+                if (!NoteData.saveNotesToUrl()) {
+                    notes[index] = previousNote;
+                    UI.renderNotes();
+                    return;
+                }
                 UI.renderNotes();
                 Helpers.showToast(t('noteUpdated'));
             },
@@ -1025,15 +1081,22 @@
 
             toggleImportant: (index) => {
                 notes[index].isImportant = !notes[index].isImportant;
-                NoteData.saveNotesToUrl();
+                if (!NoteData.saveNotesToUrl()) {
+                    notes[index].isImportant = !notes[index].isImportant;
+                    return;
+                }
                 UI.renderNotes(); // Notları yeniden çizerek önemli ikonunu güncelle
                 Helpers.showToast(notes[index].isImportant ? t('markedImportant') : t('unmarkedImportant'));
             },
 
             clearAllNotes: () => {
                 if (confirm(t('clearAllConfirm'))) {
+                    const previousNotes = notes;
                     notes = [];
-                    NoteData.saveNotesToUrl();
+                    if (!NoteData.saveNotesToUrl()) {
+                        notes = previousNotes;
+                        return;
+                    }
                     UI.renderNotes();
                     Helpers.showToast(t('allNotesDeleted'));
                 }
@@ -1125,13 +1188,17 @@
 
                         const importConfirm = confirm(t('importConfirm', { count: newNotes.length }));
 
+                        const previousNotes = notes;
                         if (importConfirm) {
                             notes = newNotes;
                         } else {
                             notes = [...notes, ...newNotes];
                         }
 
-                        NoteData.saveNotesToUrl();
+                        if (!NoteData.saveNotesToUrl()) {
+                            notes = previousNotes;
+                            return;
+                        }
                         UI.renderNotes();
                         Helpers.showToast(t('notesImported', { count: newNotes.length }));
 
@@ -1423,17 +1490,27 @@
                             return;
                         }
 
+                        const previousNotes = [...notes];
                         const [movedNote] = notes.splice(originalDraggedNoteIndexInCurrentNotes, 1);
                         notes.splice(toIndex > notes.length ? notes.length : toIndex, 0, movedNote);
-                        NoteData.saveNotesToUrl();
+                        if (!NoteData.saveNotesToUrl()) {
+                            notes = previousNotes;
+                            UI.renderNotes();
+                            return;
+                        }
                         UI.renderNotes();
                         Helpers.showToast(t('noteReordered'));
 
                     } else if (!targetElement && draggedItem) {
+                        const previousNotes = [...notes];
                         const movedNote = notes[droppedIndex];
                         notes.splice(droppedIndex, 1);
                         notes.push(movedNote);
-                        NoteData.saveNotesToUrl();
+                        if (!NoteData.saveNotesToUrl()) {
+                            notes = previousNotes;
+                            UI.renderNotes();
+                            return;
+                        }
                         UI.renderNotes();
                         Helpers.showToast(t('noteMovedToEnd'));
                     } else if (targetElement === draggedItem) {

@@ -1,8 +1,10 @@
 # Notes Offline Browser
 
-A lightweight, offline-first note-taking app that runs entirely in the browser.
+A lightweight, offline-first note-taking experiment that runs entirely in the browser.
 
 Open `index.html`, write your notes, organize them with categories and colors, and keep everything in a portable single-page workflow without installing anything.
+
+The main purpose of this app is to test the idea of storing note data directly in the URL, instead of using a server or browser storage.
 
 ## Features
 
@@ -22,7 +24,11 @@ No build step, package manager, server, or internet connection is required.
 
 ## Data Storage
 
-The app stores note data in the page URL and supports JSON export/import for backup or transfer. It does not send your notes to a server.
+The app intentionally stores note data in the page URL, inside the `?notes=...` parameter. This makes the current note state portable and shareable as a link, while keeping the app as a single static HTML file.
+
+This is an experimental design choice. It does not use a backend database or `localStorage`, and it does not send your notes to a server.
+
+URLs have practical length limits that vary by browser, bookmark manager, chat app, and operating system. When the URL becomes too long, saving new changes may fail. Use JSON export/import as a backup or transfer option for larger note sets.
 
 ## Recommended Workflow
 
