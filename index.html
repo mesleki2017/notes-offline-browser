@@ -495,6 +495,77 @@
             font-size: 14px;
         }
 
+        .url-status {
+            border: 1px solid #d8e2dc;
+            border-left: 5px solid var(--success-color);
+            border-radius: 6px;
+            background: #f8fbf9;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .url-status-main {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+            flex-wrap: wrap;
+        }
+
+        .url-status-value {
+            font-weight: 700;
+        }
+
+        .url-status-threshold {
+            color: #5f6f75;
+            font-size: 12px;
+        }
+
+        .url-status-meter {
+            height: 6px;
+            background: #e7ecef;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .url-status-meter-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--success-color);
+            transition: width 0.2s ease, background-color 0.2s ease;
+        }
+
+        .url-status-warning {
+            border-left-color: var(--warning-color);
+            background: #fff9e8;
+        }
+
+        .url-status-warning .url-status-meter-fill {
+            background: var(--warning-color);
+        }
+
+        .url-status-danger {
+            border-left-color: #e67e22;
+            background: #fff3e7;
+        }
+
+        .url-status-danger .url-status-meter-fill {
+            background: #e67e22;
+        }
+
+        .url-status-critical {
+            border-left-color: var(--danger-color);
+            background: #fdecea;
+        }
+
+        .url-status-critical .url-status-meter-fill {
+            background: var(--danger-color);
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -529,7 +600,20 @@
                     </select>
                 </div>
             </div>
-            
+
+            <div class="url-status" id="urlStatus" role="status" aria-live="polite">
+                <div class="url-status-main">
+                    <span data-i18n="urlStatusLabel">URL boyutu:</span>
+                    <span>
+                        <span class="url-status-value" id="urlStatusSize">0 KB</span>
+                        <span class="url-status-threshold" id="urlStatusThreshold">/ Uyarı: 8 KB</span>
+                    </span>
+                </div>
+                <div class="url-status-meter" aria-hidden="true">
+                    <div class="url-status-meter-fill" id="urlStatusMeterFill"></div>
+                </div>
+            </div>
+             
             <div class="input-group">
                 <label for="noteTitle" data-i18n="titleLabel">Başlık (Opsiyonel)</label>
                 <input type="text" id="noteTitle" placeholder="Not başlığı..." data-i18n-placeholder="titlePlaceholder">
@@ -641,6 +725,10 @@
             saveAndExitBtn: document.getElementById('saveAndExitBtn'),
             exitWithoutSavingBtn: document.getElementById('exitWithoutSavingBtn'),
             cancelExitBtn: document.getElementById('cancelExitBtn'),
+            urlStatus: document.getElementById('urlStatus'),
+            urlStatusSize: document.getElementById('urlStatusSize'),
+            urlStatusThreshold: document.getElementById('urlStatusThreshold'),
+            urlStatusMeterFill: document.getElementById('urlStatusMeterFill'),
             toast: document.getElementById('toast')
         };
 
@@ -728,6 +816,8 @@
                 noteReordered: 'Notun sırası değiştirildi!',
                 noteMovedToEnd: 'Not en sona taşındı!',
                 droppedOnSelf: 'Not kendi üzerine bırakıldı.',
+                urlStatusLabel: 'URL boyutu:',
+                urlStatusThreshold: '/ Uyarı: {limit}',
                 urlSizeWarning: 'Not URL’niz uzamaya başladı ({length} karakter). JSON yedeği indirmeniz iyi olur.',
                 urlSizeDanger: 'Bu URL her tarayıcıda veya yer işaretinde güvenilir çalışmayabilir ({length} karakter). JSON yedeği indirin.',
                 urlSizeCritical: 'Bu URL çok büyük ({length} karakter) ve yükleme/paylaşım sorunları çıkarabilir. Notlarınızı JSON olarak yedekleyin.',
@@ -800,6 +890,8 @@
                 noteReordered: 'Note order changed.',
                 noteMovedToEnd: 'Note moved to the end.',
                 droppedOnSelf: 'The note was dropped onto itself.',
+                urlStatusLabel: 'URL size:',
+                urlStatusThreshold: '/ Warning at {limit}',
                 urlSizeWarning: 'Your note URL is getting long ({length} characters). Consider downloading a JSON backup.',
                 urlSizeDanger: 'This URL may not work reliably in every browser or bookmark ({length} characters). Download a JSON backup.',
                 urlSizeCritical: 'This URL is very large ({length} characters) and may fail to load or share. Back up your notes as JSON.',
@@ -855,19 +947,45 @@
                 }, duration);
             },
 
+            getUrlSizeLevel: (length) => {
+                if (length >= URL_CRITICAL_LIMIT) return 'critical';
+                if (length >= URL_DANGER_LIMIT) return 'danger';
+                if (length >= URL_WARNING_LIMIT) return 'warning';
+                return 'safe';
+            },
+
+            formatUrlSize: (length) => {
+                if (length < 1000) return `${length} B`;
+                const kilobytes = length / 1000;
+                if (Number.isInteger(kilobytes)) return `${kilobytes} KB`;
+                return `${kilobytes.toFixed(kilobytes < 10 ? 1 : 0)} KB`;
+            },
+
+            encodeBase64: (text) => {
+                const bytes = new TextEncoder().encode(text);
+                let binary = '';
+                bytes.forEach(byte => {
+                    binary += String.fromCharCode(byte);
+                });
+                return btoa(binary);
+            },
+
+            decodeBase64: (text) => {
+                const binary = atob(text);
+                const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+                return new TextDecoder().decode(bytes);
+            },
+
             checkUrlSize: (url) => {
                 const length = url.length;
-                let level = 'safe';
+                const level = Helpers.getUrlSizeLevel(length);
                 let messageKey = '';
 
-                if (length >= URL_CRITICAL_LIMIT) {
-                    level = 'critical';
+                if (level === 'critical') {
                     messageKey = 'urlSizeCritical';
-                } else if (length >= URL_DANGER_LIMIT) {
-                    level = 'danger';
+                } else if (level === 'danger') {
                     messageKey = 'urlSizeDanger';
-                } else if (length >= URL_WARNING_LIMIT) {
-                    level = 'warning';
+                } else if (level === 'warning') {
                     messageKey = 'urlSizeWarning';
                 }
 
@@ -890,6 +1008,28 @@
 
         // Not Veri Yönetimi
         const NoteData = {
+            buildNotesUrl: () => {
+                const notesToSave = notes.map(note => ({
+                    title: note.title,
+                    content: note.content,
+                    category: note.category,
+                    color: note.color,
+                    isImportant: note.isImportant,
+                    createdAt: note.createdAt,
+                    timestamp: note.timestamp
+                }));
+
+                const encodedNotes = Helpers.encodeBase64(JSON.stringify(notesToSave));
+                const newUrl = notes.length > 0
+                    ? `${window.location.pathname}?notes=${encodeURIComponent(encodedNotes)}`
+                    : window.location.pathname;
+
+                return {
+                    newUrl,
+                    absoluteUrl: `${window.location.origin}${newUrl}`
+                };
+            },
+
             loadNotesFromUrl: () => {
                 const params = new URLSearchParams(window.location.search);
                 const urlNotes = params.get('notes');
@@ -897,7 +1037,7 @@
                 if (urlNotes) {
                     try {
                         const decodedNotes = decodeURIComponent(urlNotes);
-                        const notesArray = JSON.parse(atob(decodedNotes));
+                        const notesArray = JSON.parse(Helpers.decodeBase64(decodedNotes));
                         notes = notesArray.map(note => ({
                             ...note,
                             // createdAt yoksa veya geçersizse yeni tarih oluştur
@@ -916,23 +1056,10 @@
             },
 
             saveNotesToUrl: () => {
-                const notesToSave = notes.map(note => ({
-                    title: note.title,
-                    content: note.content,
-                    category: note.category,
-                    color: note.color,
-                    isImportant: note.isImportant,
-                    createdAt: note.createdAt,
-                    timestamp: note.timestamp
-                }));
-
-                const encodedNotes = btoa(JSON.stringify(notesToSave));
-                const newUrl = notes.length > 0
-                    ? `${window.location.pathname}?notes=${encodeURIComponent(encodedNotes)}`
-                    : window.location.pathname;
-                const absoluteUrl = `${window.location.origin}${newUrl}`;
+                const { newUrl, absoluteUrl } = NoteData.buildNotesUrl();
 
                 try {
+                    UI.updateUrlStatus(absoluteUrl);
                     Helpers.checkUrlSize(absoluteUrl);
                     window.history.replaceState({}, '', newUrl);
                     return true;
@@ -1219,6 +1346,17 @@
 
         // UI Güncelleme ve İşleme
         const UI = {
+            updateUrlStatus: (url = window.location.href) => {
+                const length = url.length;
+                const level = Helpers.getUrlSizeLevel(length);
+                const percentage = Math.min((length / URL_CRITICAL_LIMIT) * 100, 100);
+
+                DOM.urlStatus.className = `url-status url-status-${level}`;
+                DOM.urlStatusSize.textContent = Helpers.formatUrlSize(length);
+                DOM.urlStatusThreshold.textContent = t('urlStatusThreshold', { limit: Helpers.formatUrlSize(URL_WARNING_LIMIT) });
+                DOM.urlStatusMeterFill.style.width = `${percentage}%`;
+            },
+
             applyLanguage: () => {
                 const safeLanguage = translations[currentLanguage] ? currentLanguage : 'tr';
                 currentLanguage = safeLanguage;
@@ -1236,6 +1374,7 @@
                     element.placeholder = t(element.dataset.i18nPlaceholder);
                 });
 
+                UI.updateUrlStatus();
                 UI.renderNotes();
             },
 
